@@ -192,7 +192,9 @@ labels: [{% for order in cur_orders %} '{{ order.date|date:"F d" }}--{{order.pro
 </div>
 <!--End Graphs-->
 {%else %}
+
 {% include 'dashboard/staff_index.html'%}
+
 {% endif %}
 <style>
     @media print {

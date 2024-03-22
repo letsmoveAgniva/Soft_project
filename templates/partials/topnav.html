@@ -5,11 +5,15 @@
             <div class="card">
                 <div class="card-header bg-info text-white">
                     Information
+                    
+                    <a href="{% url 'edit-information' %}" class="btn btn-primary offset-md-5">Edit</a>
+                    
                 </div>
                 <div class="card-body">
                     <marquee behavior="" direction="">
-                        <h3 class="my-4">This is the Information</h3>
-                    </marquee>
+                        <h3 class="my-4">{{ information_content }}</h3>
+                        </marquee>
+                        
                 </div>
             </div>
         </div>
