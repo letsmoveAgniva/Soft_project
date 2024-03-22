@@ -75,7 +75,13 @@
                                     'rgba(255, 206, 86, 1)',
                                     'rgba(75, 192, 192, 1)',
                                     'rgba(153, 102, 255, 1)',
-                                    'rgba(255, 159, 64, 1)'
+                                    'rgba(255, 159, 64, 1)',
+                                    'rgba(255, 99, 100, 1)',
+                                    'rgba(54, 116, 235, 1)',
+                                    'rgba(255, 286, 86, 1)',
+                                    'rgba(110, 192, 192, 1)',
+                                    'rgba(153, 160, 255, 1)',
+                                    'rgba(255, 159, 30, 1)',
                                 ],
                                 borderColor: [
                                     'rgba(255, 99, 132, 1)',
@@ -98,13 +104,109 @@
                             }
                         }
                     });
+                    function printStatistics() {
+                        window.print();
+                    }
                 </script>
             </div>
         </div>
     </div>
+    <div class="row my-5">
+        <div class="col-md-6">
+            <!-- Daily Selling Price Plot -->
+            <div class="bg-white">
+                <canvas id="dailySellingPriceChart" width="400" height="300"></canvas>
+                <script>
+                    var ctx1 = document.getElementById('dailySellingPriceChart').getContext('2d');
+                    var myChart1 = new Chart(ctx1, {
+                        type: 'bar',
+                        data: {
+                            
+labels: [{% for order in cur_orders %} '{{ order.date|date:"F d" }}--{{order.product.name}}' ,{% endfor %}],
+                            datasets: [{
+                                label: 'Daily Selling Price',
+                                data: [{% for daily_selling_price in cur_daily_selling_prices %}'{{ daily_selling_price }}',{% endfor %}],
+                                backgroundColor: 'rgba(255, 99, 132, 0.2)',
+                                borderColor: 'rgba(255, 99, 132, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                </script>
+            </div>
+        </div>
+        <div class="col-md-6">
+            <!-- Profit Plot -->
+            <div class="bg-white">
+                <canvas id="profitChart" width="400" height="300"></canvas>
+                <script>
+                    var ctx2 = document.getElementById('profitChart').getContext('2d');
+                    var myChart2 = new Chart(ctx2, {
+                        type: 'bar',
+                        data: {
+                            labels: [{% for order in orders %} '{{ order.date|date:"F d" }} - {{ order.product.name }}',{% endfor %}],
+                            datasets: [{
+                                label: 'Profit',
+                                data: [{% for profit in profits %}'{{ profit }}',{% endfor %}],
+                                backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                                borderColor: 'rgba(54, 162, 235, 1)',
+                                borderWidth: 1
+                            }]
+                        },
+                        options: {
+                            scales: {
+                                yAxes: [{
+                                    ticks: {
+                                        beginAtZero: true
+                                    }
+                                }]
+                            }
+                        }
+                    });
+                    function printStatistics() {
+                        window.print();
+                    }
+                </script>
+            </div>
+        </div>
+    </div>
+    <div class="container2">
+        <div class="row justify-content-center">
+            <div class="col-md-6 text-center"> <!-- Adjust the column size as needed -->
+                <button class="btn btn-primary my-8 my-4" onclick="printStatistics()">Print</button>
+                <a href="{% url 'sales_statistics' %}" class="btn btn-primary">View Sales Statistics</a>
+
+            </div>
+        </div>
+    </div>
+    
 </div>
 <!--End Graphs-->
 {%else %}
 {% include 'dashboard/staff_index.html'%}
 {% endif %}
+<style>
+    @media print {
+        /* Hide the first page */
+        /* Show only the second page */
+        @page {
+            size: auto;  /* Use the default print paper size */
+            margin: 0;   /* Reset margin */
+        }
+        div.container {
+            display: block;  /* Display the container */
+            position: fixed; /* Fix the container */
+            top: 0;          /* Position it at the top */
+        }
+    }
+</style>
 {% endblock %}

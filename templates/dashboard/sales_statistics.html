@@ -1,0 +1,37 @@
+{% extends 'partials/base.html'%}
+{% block title %} Sales Statistics Page {% endblock %}
+{% load crispy_forms_tags %}
+{% block content %}
+
+
+<!--Table-->
+<div class="container">
+    <div class="row my-4">
+        <div class="col-md-6 offset-md-3 ">
+            <table class="table bg-white">
+                <thead>
+                    <tr>
+                        <th>Product</th>
+                        <th>Quantity Sold</th>
+                        <th>Individual Price</th>
+                        <th>Total Selling Price</th>
+                        <th>Profit</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in statistics %}
+                    <tr>
+                        <td>{{ item.product }}</td>
+                        <td>{{ item.quantity_sold }}</td>
+                        <td>{{ item.price_realized }}</td>
+                        <td>{{ item.total_selling_price }}</td>
+                        <td>{{ item.profit }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+
+</div>
+{% endblock %}

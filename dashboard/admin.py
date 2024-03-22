@@ -5,7 +5,7 @@ from django.contrib.auth.models import Group
 admin.site.site_header = "Agniv's Inventory Dashboard"
 
 class ProductAdmin(admin.ModelAdmin):
-    list_display=('name','category','quantity')
+    list_display=('name','category','quantity', 'buying_price', 'selling_price')
     list_filter=['category']
     fields=('name','category','quantity')
 admin.site.register(Product,ProductAdmin)

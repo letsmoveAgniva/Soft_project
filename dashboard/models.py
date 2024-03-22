@@ -11,7 +11,8 @@ class Product(models.Model):
     category=models.CharField(max_length=20, choices=CATEGORY, null=True)
     quantity=models.PositiveIntegerField(null=True)
     ordered_quantity=models.PositiveIntegerField(null=True, default=0)
-    
+    buying_price = models.PositiveIntegerField(null = True)
+    selling_price = models.PositiveIntegerField(null = True)
     class Meta:
         verbose_name_plural='Product'
     
@@ -23,6 +24,9 @@ class Order(models.Model):
     staff=models.ForeignKey(User, models.CASCADE,null=True)
     order_quantity=models.PositiveIntegerField(null=True)
     date = models.DateTimeField(auto_now_add=True)
+    
+    def calculate_profit(self):
+        return (self.product.selling_price - self.product.buying_price) * self.product.ordered_quantity
     
     
     def __str__(self):

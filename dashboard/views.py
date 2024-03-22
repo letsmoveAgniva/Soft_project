@@ -8,35 +8,60 @@ from django.contrib import messages
 # Create your views here.
 @login_required
 def index(request):
-    orders=Order.objects.all()
-    products=Product.objects.all()
-    workers_count=User.objects.all().count()
-    orders_count=Order.objects.count()
-    products_count=Product.objects.count()
-    if request.method=='POST':
-        form=OrderForm(request.POST)
+    orders = Order.objects.all()
+    products = Product.objects.all()
+    workers_count = User.objects.all().count()
+    orders_count = Order.objects.count()
+    products_count = Product.objects.count()
+    
+    # Filter out orders with order_quantity not equal to zero
+    cur_orders = []
+    cur_products = set()  # Track unique products
+    for order in orders:
+        if order.product not in cur_products:
+            cur_orders.append(order)
+            cur_products.add(order.product)
+
+    # Calculate daily selling prices
+    cur_daily_selling_prices = []
+    for order in cur_orders:
+        daily_selling_price = order.product.selling_price * order.product.ordered_quantity
+        if daily_selling_price != 0:  # Exclude zero selling prices
+            cur_daily_selling_prices.append(daily_selling_price)
+
+    # Calculate profit
+    profits = [(order.product.selling_price - order.product.buying_price) * order.order_quantity for order in orders]
+
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
         if form.is_valid():
-            instance=form.save(commit=False)
-            instance.staff=request.user
-            product=Product.objects.get(id=form.data['product'])
-            #change product quantity
-            product.quantity-=int(form.data['order_quantity'])
-            product.ordered_quantity+=int(form.data['order_quantity'])
+            instance = form.save(commit=False)
+            instance.staff = request.user
+            product = Product.objects.get(id=form.data['product'])
+            # Change product quantity
+            product.quantity -= int(form.data['order_quantity'])
+            product.ordered_quantity += int(form.data['order_quantity'])
             product.save()
             instance.save()
             return redirect('dashboard-index')
     else:
-        form=OrderForm()
-    context={
-        'orders':orders,
-        'form':form,
-        'products':products,
-        'workers_count':workers_count,
-        'orders_count':orders_count,
-        'products_count':products_count,
+        form = OrderForm()
+
+    context = {
+        'orders': orders,
+        'cur_orders': cur_orders,
+        'form': form,
+        'products': products,
+        'workers_count': workers_count,
+        'orders_count': orders_count,
+        'products_count': products_count,
+       # 'daily_selling_prices': daily_selling_prices,
+        'cur_daily_selling_prices': cur_daily_selling_prices,
+        'profits': profits,
     }
-    # print(context)
-    return render(request, 'dashboard/index.html',context)
+
+    return render(request, 'dashboard/index.html', context)
+
 @login_required
 def staff(request):
     workers=User.objects.all()
@@ -120,6 +145,29 @@ def order(request):
         'products_count':products_count,
     }
     return render(request, 'dashboard/order.html',context)
+
+
+
+
+def sales_statistics(request):
+    orders = Order.objects.all()
+    cur_orders = []
+    cur_products = set()  # Track unique products
+    for order in orders:
+        if order.product not in cur_products:
+            cur_orders.append(order)
+            cur_products.add(order.product)
+    statistics = []
+    for order in cur_orders:
+        profit = order.calculate_profit()
+        statistics.append({
+            'product': order.product.name,
+            'quantity_sold': order.product.ordered_quantity,
+            'price_realized': order.product.selling_price,
+            'profit': profit,
+            'total_selling_price': order.product.ordered_quantity * order.product.selling_price,
+        })
+    return render(request, 'dashboard/sales_statistics.html', {'statistics': statistics})
 
 
 

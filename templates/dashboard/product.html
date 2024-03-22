@@ -34,6 +34,8 @@
                         <th scope="col">Name</th>
                         <th scope="col">Category</th>
                         <th scope="col">Quantity</th>
+                        <th scope="col">Buying Price</th>
+                        <th scope="col">Selling Price</th>
                         <th scope="col">Activity</th>
                     </tr>
                 </thead>
@@ -44,6 +46,8 @@
                         <td>{{ item.name }}</td>
                         <td>{{item.category}}</td>
                         <td>{{item.quantity}}</td>
+                        <td>{{item.buying_price}}</td>
+                        <td>{{item.selling_price}}</td>
                         <td>
                             <a class="btn btn-info btn-sm" href="{% url 'dashboard-product-update' item.id %}">Edit</a>
                             <a class="btn btn-danger btn-sm" href="{% url 'dashboard-product-delete' item.id %}">Delete</a>
