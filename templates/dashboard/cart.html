@@ -1,0 +1,46 @@
+{% extends 'partials/base.html'%}
+{% block title %} Cart Page {% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<!--Table-->
+<div class="container">
+    <div class="row">
+        <div class="col-md-12">
+            <h1 class="text-center">Cart</h1>
+            {% if True %}
+            <table class="table table-bordered table-hover">
+                <thead>
+                    <tr>
+                        <th>Product Name</th>
+                        <th>Quantity</th>
+                        <th>Price</th>
+                        <th>Total</th>
+                        <th>Action</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for item in cart_orders %}
+                    <tr>
+                        <td>{{ item.product.name }}</td>
+                        <td>{{ item.order_quantity }}</td>
+                        <td>{{ item.product.selling_price }}</td>
+                        <td>{% widthratio item.product.selling_price 1 item.order_quantity %}
+                        </td>
+                        <td>
+                            <a href="#" class="btn btn-danger">Remove</a>
+                        </td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+            <a href="#" class="btn btn-danger">Clear Cart</a>
+            <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
+            {% else %}
+            <h1 class="text-center">Cart is Empty</h1>
+            {% endif %}
+        </div>
+    </div>
+</div>
+{% endif %}
+{% endblock %}

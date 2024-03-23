@@ -23,7 +23,7 @@ class Product(models.Model):
 class Order(models.Model):
     
     STATUS_CHOICES = [
-        ('IN PROGRESS', 'In Progress'),
+        ('IN_PROGRESS', 'In Progress'),
         ('COMPLETED', 'Completed'),
     ]
 
@@ -31,7 +31,7 @@ class Order(models.Model):
     staff = models.ForeignKey(User, models.CASCADE, null=True)
     order_quantity = models.PositiveIntegerField(null=True)
     date = models.DateTimeField(auto_now_add=True)
-    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='in_progress')
+    status = models.CharField(max_length=20, choices=STATUS_CHOICES, default='IN_PROGRESS')
     
     def calculate_profit(self):
         return (self.product.selling_price - self.product.buying_price) * self.product.ordered_quantity
@@ -39,8 +39,6 @@ class Order(models.Model):
     def __str__(self):
         return f'{self.product} ordered by {self.staff.username}'
 
-    
-    
 class Information(models.Model):
     content = models.CharField(max_length=200)
 
