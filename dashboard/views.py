@@ -51,7 +51,6 @@ def index(request):
                 product.save()
                 instance.save()
                 messages.success(request, 'Order has been placed successfully')
-        else:
             form = OrderForm()
     else:
         form = OrderForm()

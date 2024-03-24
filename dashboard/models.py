@@ -17,7 +17,7 @@ class Product(models.Model):
         verbose_name_plural='Product'
     
     def __str__(self):
-        return f'{self.name}-{self.quantity}'
+        return f'{self.name}'
     
 
 class Order(models.Model):
