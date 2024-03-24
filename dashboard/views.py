@@ -5,6 +5,9 @@ from .models import Product, Order, Information
 from .forms import ProductForm, OrderForm, InformationForm, ProductEditForm, OrderUpdateForm
 from django.contrib.auth.models import User
 from django.contrib import messages
+from datetime import datetime
+from random import randint
+
 # Create your views here.
 @login_required
 def index(request):
@@ -39,12 +42,16 @@ def index(request):
             instance = form.save(commit=False)
             instance.staff = request.user
             product = Product.objects.get(id=form.data['product'])
-            # Change product quantity
-            product.quantity -= int(form.data['order_quantity'])
-            product.ordered_quantity += int(form.data['order_quantity'])
-            product.save()
-            instance.save()
-            return redirect('dashboard-index')
+            if int(form.data['order_quantity']) > product.quantity:
+                messages.error(request, 'Order quantity exceeds available stock')
+            else:
+                # Change product quantity
+                product.quantity -= int(form.data['order_quantity'])
+                product.ordered_quantity += int(form.data['order_quantity'])
+                product.save()
+                instance.save()
+                messages.success(request, 'Order has been placed successfully')
+            form = OrderForm()
     else:
         form = OrderForm()
 
@@ -63,6 +70,39 @@ def index(request):
     }
 
     return render(request, 'dashboard/index.html', context)
+
+def cart(request):
+    cart_orders = Order.objects.filter(status='IN_PROGRESS', staff=request.user) 
+    context = {
+        'cart_orders': cart_orders,
+    }
+    return render(request, 'dashboard/cart.html', context)
+
+def checkout(request):
+    cart_orders = Order.objects.filter(status='IN_PROGRESS', staff=request.user)
+    total_price = sum([order.product.selling_price * order.order_quantity for order in cart_orders])
+    context = {
+        'total_price': total_price,
+    }
+    return render(request, 'dashboard/checkout.html', context)
+
+def billing(request):
+    cart_orders = Order.objects.filter(status='IN_PROGRESS', staff=request.user)
+    total_price = sum([order.product.selling_price * order.order_quantity for order in cart_orders])
+    for order in cart_orders:
+        order.status = 'COMPLETED'
+        order.save()
+    
+    # use system date and a random number as bill number
+    bill_number = f'{datetime.now().strftime("%Y%m%d%H%M%S")}{randint(1000, 9999)}'
+    date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    context = {
+        'cart_orders': cart_orders,
+        'total_price': total_price,
+        'date': date,
+        'bill_number': bill_number,
+    }
+    return render(request, 'dashboard/billing.html', context)
 
 @login_required
 def staff(request):
@@ -110,6 +150,7 @@ def product(request):
         'products_count':products_count,
     }
     return render(request, 'dashboard/product.html', context)
+
 @login_required
 def product_delete(request, pk):
     item=Product.objects.get(id=pk)

@@ -1,0 +1,57 @@
+{% block title %} Bill Page {% endblock %}
+
+{% block content %}
+{% if user.is_authenticated %}
+<!--Table-->
+{% comment %}
+The bill in a classical black and white view
+The bill should contain the following information:
+- The bill number generated at random
+- The date of the bill( current date )
+- A list of the items bought by the user
+- The total amount of the bill
+- The user's name
+- A buy again message
+{% endcomment %}
+<div class="container justify-content-center">
+    <div class="row">
+        <div class="col-md-12">
+            <div class="card">
+                <div class="card-header">
+                    <h4>Bill</h4>
+                </div>
+                <div class="card-body">
+                    <div class="table-responsive">
+                        <table class="table table-bordered">
+                            <thead>
+                                <tr>
+                                    <th>Item</th>
+                                    <th>Price</th>
+                                </tr>
+                            </thead>
+                            <tbody>
+                                {% for item in cart_orders %}
+                                <tr>
+                                    <td>{{ item.product.name }}</td>
+                                    <td>{{ item.product.selling_price }}</td>
+                                </tr>
+                                {% endfor %}
+                                <tr>
+                                    <td>Total</td>
+                                    <td>{{ total_price }}</td>
+                                </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="card-footer">
+                    <p>Bill number: {{ bill_number }}</p>
+                    <p>Date: {{ date }}</p>
+                    <p>User: {{ user.username }}</p>
+                    <p>Thank you for shopping with us. Buy again!</p>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endif %}
+{% endblock %}

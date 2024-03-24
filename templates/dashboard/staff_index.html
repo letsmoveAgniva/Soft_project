@@ -18,6 +18,13 @@
       <div class="card">
         <div class="card-header">Make Request</div>
         <div class="card-body">
+          {% if messages %}
+          {% for message in messages %}
+          <div class="alert alert-{% if message.tags == "success" %}success{% else %} warning {% endif %}">
+            {{ message }}
+          </div>
+          {% endfor %}
+          {% endif %}
           <form method="POST">
             {% csrf_token %}
             {{ form|crispy }}
