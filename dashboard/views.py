@@ -7,6 +7,8 @@ from django.contrib.auth.models import User
 from django.contrib import messages
 from datetime import datetime
 from random import randint
+import barcode
+from barcode.writer import ImageWriter
 
 # Create your views here.
 @login_required
@@ -35,26 +37,7 @@ def index(request):
 
     # Calculate profit
     profits = [(order.product.selling_price - order.product.buying_price) * order.order_quantity for order in orders]
-
-    if request.method == 'POST':
-        form = OrderForm(request.POST)
-        if form.is_valid():
-            instance = form.save(commit=False)
-            instance.staff = request.user
-            product = Product.objects.get(id=form.data['product'])
-            if int(form.data['order_quantity']) > product.quantity:
-                messages.error(request, 'Order quantity exceeds available stock')
-            else:
-                # Change product quantity
-                product.quantity -= int(form.data['order_quantity'])
-                product.ordered_quantity += int(form.data['order_quantity'])
-                product.save()
-                instance.save()
-                messages.success(request, 'Order has been placed successfully')
-            form = OrderForm()
-    else:
-        form = OrderForm()
-
+    form = OrderForm()
     context = {
         'orders': orders,
         'cur_orders': cur_orders,
@@ -71,6 +54,24 @@ def index(request):
 
     return render(request, 'dashboard/index.html', context)
 
+def add_to_cart(request):
+    if request.method == 'POST':
+        form = OrderForm(request.POST)
+        if form.is_valid():
+            instance = form.save(commit=False)
+            instance.staff = request.user
+            product = Product.objects.get(id=form.data['product'])
+            if int(form.data['order_quantity']) > product.quantity:
+                messages.error(request, 'Order quantity exceeds available stock')
+            else:
+                # Change product quantity
+                product.quantity -= int(form.data['order_quantity'])
+                product.ordered_quantity += int(form.data['order_quantity'])
+                product.save()
+                instance.save()
+                messages.success(request, 'Order has been placed successfully')
+    return redirect('dashboard-index')
+
 def cart(request):
     cart_orders = Order.objects.filter(status='IN_PROGRESS', staff=request.user) 
     context = {
@@ -86,6 +87,7 @@ def checkout(request):
     }
     return render(request, 'dashboard/checkout.html', context)
 
+@login_required
 def billing(request):
     cart_orders = Order.objects.filter(status='IN_PROGRESS', staff=request.user)
     total_price = sum([order.product.selling_price * order.order_quantity for order in cart_orders])
@@ -96,6 +98,11 @@ def billing(request):
     # use system date and a random number as bill number
     bill_number = f'{datetime.now().strftime("%Y%m%d%H%M%S")}{randint(1000, 9999)}'
     date = datetime.now().strftime("%Y-%m-%d %H:%M:%S")
+    barcode_format = 'code128'
+    barcode_class = barcode.get_barcode_class(barcode_format)
+    barcode_image = barcode_class(bill_number, writer=ImageWriter())
+    barcode_image.save('media/barcode/barcode', options={'module_width': 0.5, 'module_height': 15.0, 'font_size': 10})
+            
     context = {
         'cart_orders': cart_orders,
         'total_price': total_price,

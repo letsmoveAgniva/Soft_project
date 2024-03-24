@@ -7,7 +7,6 @@ admin.site.site_header = "Agniv's Inventory Dashboard"
 class ProductAdmin(admin.ModelAdmin):
     list_display=('name','category','quantity', 'buying_price', 'selling_price')
     list_filter=['category']
-    fields=('name','category','quantity')
+    fields=('name','category','quantity','buying_price','selling_price')
 admin.site.register(Product,ProductAdmin)
 admin.site.register(Order)
-#admin.site.unregister(Group)

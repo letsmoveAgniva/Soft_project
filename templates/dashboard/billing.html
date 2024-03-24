@@ -1,19 +1,10 @@
+{% extends 'partials/base.html'%}
+
 {% block title %} Bill Page {% endblock %}
 
 {% block content %}
-{% if user.is_authenticated %}
-<!--Table-->
-{% comment %}
-The bill in a classical black and white view
-The bill should contain the following information:
-- The bill number generated at random
-- The date of the bill( current date )
-- A list of the items bought by the user
-- The total amount of the bill
-- The user's name
-- A buy again message
-{% endcomment %}
-<div class="container justify-content-center">
+
+<div class="container">
     <div class="row">
         <div class="col-md-12">
             <div class="card">
@@ -33,7 +24,7 @@ The bill should contain the following information:
                                 {% for item in cart_orders %}
                                 <tr>
                                     <td>{{ item.product.name }}</td>
-                                    <td>{{ item.product.selling_price }}</td>
+                                    <td>{% widthratio item.product.selling_price 1 item.order_quantity %}</td>
                                 </tr>
                                 {% endfor %}
                                 <tr>
@@ -44,14 +35,16 @@ The bill should contain the following information:
                         </table>
                     </div>
                 </div>
-                <div class="card-footer">
-                    <p>Bill number: {{ bill_number }}</p>
-                    <p>Date: {{ date }}</p>
-                    <p>User: {{ user.username }}</p>
-                    <p>Thank you for shopping with us. Buy again!</p>
-                </div>
             </div>
         </div>
     </div>
-{% endif %}
+    <div class="card-footer text-center">
+        <p>Bill number: {{ bill_number }}</p>
+        <p>Date: {{ date }}</p>
+        <p>User: {{ user.username }}</p>
+        <img src="/media/barcode/barcode.png" alt="barcode" class="center" width=300>
+        <p>Thank you for shopping with us. Buy again!</p>
+        <button type="button" onclick="window.print()" class="btn btn-primary" >Print</button>
+    </div>
+</div>
 {% endblock %}
