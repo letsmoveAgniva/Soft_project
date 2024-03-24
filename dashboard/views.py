@@ -13,10 +13,10 @@ from barcode.writer import ImageWriter
 # Create your views here.
 @login_required
 def index(request):
-    orders = Order.objects.all()
+    orders = Order.objects.filter(status='COMPLETED')
     products = Product.objects.all()
     workers_count = User.objects.all().count()
-    orders_count = Order.objects.count()
+    orders_count = orders.count()
     products_count = Product.objects.count()
     information = Information.objects.first()  # Assuming there's only one instance
     information_content = information.content if information else ""  # Retrieve th
@@ -27,6 +27,8 @@ def index(request):
         if order.product not in cur_products:
             cur_orders.append(order)
             cur_products.add(order.product)
+
+    in_cart = Order.objects.filter(status='IN_PROGRESS').count()
 
     # Calculate daily selling prices
     cur_daily_selling_prices = []
@@ -40,6 +42,7 @@ def index(request):
     form = OrderForm()
     context = {
         'orders': orders,
+        'in_cart': in_cart,
         'cur_orders': cur_orders,
         'form': form,
         'products': products,
@@ -61,21 +64,27 @@ def add_to_cart(request):
             instance = form.save(commit=False)
             instance.staff = request.user
             product = Product.objects.get(id=form.data['product'])
+            order = Order.objects.filter(product=product, status='IN_PROGRESS', staff=request.user).first()
             if int(form.data['order_quantity']) > product.quantity:
                 messages.error(request, 'Order quantity exceeds available stock')
-            else:
-                # Change product quantity
+            elif order:
+                order.order_quantity += int(form.data['order_quantity'])
                 product.quantity -= int(form.data['order_quantity'])
-                product.ordered_quantity += int(form.data['order_quantity'])
+                product.save()
+                order.save()
+                messages.success(request, 'Added to cart successfully')
+            else:
+                product.quantity -= int(form.data['order_quantity'])
                 product.save()
                 instance.save()
-                messages.success(request, 'Order has been placed successfully')
+                messages.success(request, 'Added to cart successfully')                
     return redirect('dashboard-index')
 
 def cart(request):
     cart_orders = Order.objects.filter(status='IN_PROGRESS', staff=request.user) 
     context = {
         'cart_orders': cart_orders,
+        'cart': cart_orders.count(),
     }
     return render(request, 'dashboard/cart.html', context)
 
@@ -93,6 +102,9 @@ def billing(request):
     total_price = sum([order.product.selling_price * order.order_quantity for order in cart_orders])
     for order in cart_orders:
         order.status = 'COMPLETED'
+        product = order.product
+        product.ordered_quantity += order.order_quantity
+        product.save()
         order.save()
     
     # use system date and a random number as bill number

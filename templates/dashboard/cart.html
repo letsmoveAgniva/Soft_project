@@ -8,7 +8,7 @@
     <div class="row">
         <div class="col-md-12">
             <h1 class="text-center">Cart</h1>
-            {% if True %}
+            {% if cart %}
             <table class="table table-bordered table-hover">
                 <thead>
                     <tr>
@@ -37,7 +37,10 @@
             <a href="#" class="btn btn-danger">Clear Cart</a>
             <a href="{% url 'checkout' %}" class="btn btn-primary">Checkout</a>
             {% else %}
-            <h1 class="text-center">Cart is Empty</h1>
+            {% comment %} A warning that the cart is empty in bootstrap add a padding {% endcomment %}
+            <div class="alert alert-warning mt-5" role="alert">
+                <strong>Warning!</strong> Your cart is empty.
+            </div>
             {% endif %}
         </div>
     </div>

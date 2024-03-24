@@ -63,6 +63,11 @@
               {% endfor %}
             </tbody>
           </table>
+          {%if in_cart %}
+          <p class="text-center text-info text-bold mt-4 mb-4 bg-light p-2 border border-info rounded shadow-sm">
+            You have {{ in_cart }} items in your cart. Go to cart to view them.
+          </p>
+          {% endif %}
         </div>
       </div>
     </div>
